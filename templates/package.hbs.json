@@ -1,0 +1,28 @@
+{
+  "name": "@shopify/{{name}}",
+  "version": "0.0.0",
+  "license": "MIT",
+  "description": "{{description}}",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "scripts": {
+    "build": "tsc --p tsconfig.json"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "@shopify:registry": "https://registry.npmjs.org"
+  },
+  "author": "Shopify Inc.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shopify/libra-web-tools.git",
+    "directory": "packages/{{name}}"
+  },
+  "bugs": {
+    "url": "https://github.com/Shopify/libra-web-tools/issues"
+  },
+  "homepage": "https://github.com/Shopify/libra-web-tools/blob/master/packages/{{name}}/README.md",
+  "dependencies": {},
+  "files": ["dist/*", "!tsconfig.tsbuildinfo"]
+}
