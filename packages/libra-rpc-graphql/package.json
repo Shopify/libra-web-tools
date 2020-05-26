@@ -1,0 +1,44 @@
+{
+  "name": "@shopify/libra-rpc-graphql",
+  "version": "0.0.0",
+  "license": "MIT",
+  "description": "GraphQL utilities for connecting to the Libra network via the JSON-RPC API.",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "scripts": {
+    "build": "tsc --p tsconfig.json",
+    "postbuild": "yarn run introspectify dist/schema.graphql dist/src/graphql/schema.json",
+    "introspectify": "node scripts/introspectify.js"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "@shopify:registry": "https://registry.npmjs.org"
+  },
+  "author": "Shopify Inc.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shopify/libra-web-tools.git",
+    "directory": "packages/libra-rpc-graphql"
+  },
+  "bugs": {
+    "url": "https://github.com/Shopify/libra-web-tools/issues"
+  },
+  "homepage": "https://github.com/Shopify/libra-web-tools/blob/master/packages/libra-rpc-graphql/README.md",
+  "dependencies": {
+    "@open-rpc/client-js": "^1.0.0",
+    "apollo-link-schema": "^1.0.0",
+    "graphql": "^14.0.0",
+    "graphql-tools": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^7.0.0",
+    "apollo-client": "^2.0.0",
+    "apollo-cache-inmemory": "^1.0.0",
+    "graphql-tag": "^2.0.0"
+  },
+  "files": [
+    "dist/*",
+    "!tsconfig.tsbuildinfo"
+  ]
+}

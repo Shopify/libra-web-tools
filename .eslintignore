@@ -1,0 +1,7 @@
+node_modules
+coverage
+**/node_modules/*
+**/packages/*.js
+*.d.ts
+**/templates/*
+**/dummy/**

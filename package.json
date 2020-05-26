@@ -1,0 +1,67 @@
+{
+  "name": "libra-web-tools",
+  "version": "1.0.0",
+  "description": "A collection of web tooling for the Libra network.",
+  "engines": {
+    "node": "~v10.18.0",
+    "yarn": "<=1.21.1"
+  },
+  "scripts": {
+    "publish": "lerna publish",
+    "build": "yarn tsc --build packages",
+    "postbuild": "node scripts/postbuild.js",
+    "lint": "eslint '**/*.{ts,tsx}'",
+    "lint:changelogs": "node scripts/lint-changelogs.js",
+    "ci:lint-docs": "yarn generate docs && test -z \"$(git status --porcelain)\" || echo 'The root README has not been updated. Run `yarn generate docs` in the root of your libra-web-tools directory and try again.'",
+    "pretest": "yarn build",
+    "test": "yarn jest --no-coverage",
+    "test:ci": "yarn jest --maxWorkers=3 --coverage",
+    "check": "lerna run check",
+    "release": "yarn lint:changelogs && lerna publish",
+    "release-beta": "lerna publish --dist-tag beta",
+    "clean": "rimraf './packages/*/dist'",
+    "generate": "plop",
+    "generate:package": "plop package && yarn plop docs",
+    "tophat": "tophat"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shopify/libra-web-tools.git"
+  },
+  "author": "Shopify Inc.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Shopify/libra-web-tools/issues"
+  },
+  "homepage": "https://github.com/Shopify/libra-web-tools#readme",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "@shopify/tophat": "^0.0.4",
+    "@types/faker": "^4.0.0",
+    "@types/fs-extra": "^8.0.0",
+    "@types/jest": "^24.0.0",
+    "babel-jest": "^24.0.0",
+    "babel-loader": "^8.0.0",
+    "babel-preset-shopify": "^20.0.0",
+    "codecov": "^3.0.0",
+    "element-closest": "^3.0.1",
+    "eslint": "^6.0.0",
+    "eslint-plugin-shopify": "^32.0.0",
+    "faker": "^4.0.0",
+    "fs-extra": "^8.0.0",
+    "glob": "^7.0.0",
+    "jest": "^24.0.0",
+    "jest-transform-graphql": "^2.1.0",
+    "lerna": "^2.0.0",
+    "plop": "^2.0.0",
+    "prettier": "~1.17.0",
+    "rimraf": "^2.0.0",
+    "ts-jest": "^23.0.0",
+    "tslib": "^1.0.0",
+    "typescript": "~3.9.0"
+  }
+}
