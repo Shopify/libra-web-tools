@@ -1,0 +1,466 @@
+"""
+A 64 bit integer
+"""
+scalar Int64
+"""
+A hex-encoded string
+"""
+scalar HexString
+
+"""
+Amount in a specific currency.
+"""
+type Amount {
+  """
+  amount in currency microunits
+  """
+  amount: Int64!
+  """
+  currency string identifier
+  """
+  currency: String!
+}
+
+"""
+A Libra account.
+"""
+type Account {
+  """
+  The next sequence number for the current account
+  """
+  sequenceNumber: Int64!
+  """
+  Hex-encoded authentication key for the account
+  """
+  authenticationKey: HexString!
+  """
+  If true, another account has the ability to rotate the authentication key for this account.
+  """
+  delegatedKeyRotationCapability: Boolean!
+  """
+  If true, another account has the ability to withdraw funds from this account.
+  """
+  delegatedWithdrawalCapacity: Boolean!
+  """
+  Balance of given account
+  """
+  balance: Amount!
+  """
+  Unique key for the sent events stream of this account
+  """
+  sentEventsKey: ID!
+  """
+  Unique key for the received events stream of this account
+  """
+  receivedEventsKey: ID!
+}
+
+"""
+An event emitted during a transaction
+"""
+interface EventData {
+  """
+  Const string for the event type
+  """
+  type: String!
+}
+
+"""
+Event emitted when an account received a payment.
+"""
+type ReceivedPaymentEvent implements EventData {
+  """
+  Const string “receivedpayment”
+  """
+  type: String!
+  """
+  Amount received from the sender of the transaction
+  """
+  amount: Amount!
+  """
+  Hex-encoded address of the sender of the transaction that emitted the given event
+  """
+  sender: HexString!
+  """
+  An optional field that can contain extra metadata for the event.
+  Note: This information can be used by an off-chain API to implement a sub-addressing scheme for a wallet.
+  """
+  metadata: HexString
+}
+
+"""
+Event emitted when an account sends a payment.
+"""
+type SentPaymentEvent implements EventData {
+  """
+  Const string “sentpayment”
+  """
+  type: String!
+  """
+  Amount transferred in a transaction
+  """
+  amount: Amount!
+  """
+  Hex-encoded address of the receiver of an associated transaction
+  """
+  receiver: HexString!
+  """
+  An optional field that can contain extra metadata for the event.
+  Note: This information can be used by another API to implement a subaddressing scheme for a wallet
+  """
+  metadata: HexString
+}
+
+"""
+Represents events currently unsupported by JSON-RPC API.
+"""
+type UnknownEvent implements EventData {
+  """
+  Const string “unknown”
+  """
+  type: String!
+}
+
+"""
+An event emitted during a transaction
+"""
+type Event {
+  """
+  Gobally unique identifier of event stream
+  """
+  key: ID!
+  """
+  Sequence number of the current event in the given even stream
+  """
+  sequenceNumber: Int!
+  """
+  Version of the transaction that emitted this event
+  """
+  transactionVersion: Int!
+  """
+  ReceivedPayment or SentPayment or UnknownEvent object
+  """
+  data: EventData!
+}
+
+"""
+Current state of a Libra full node
+"""
+type Metadata {
+  """
+  The latest transaction version
+  """
+  version: Int64!
+  """
+  the block timestamp
+  """
+  timestamp: Int64!
+}
+
+"""
+Metadata for this transaction. Possible types are BlockMetadataTransaction, WriteSetTransaction, UserTransaction, UnknownTransaction.
+"""
+interface TransactionData {
+  """
+  Const string for the transaction type
+  """
+  type: String!
+}
+
+"""
+A Libra network transaction that contains the metadata for the block. This transaction is always at the beginning of a block.
+"""
+type BlockMetadataTransaction implements TransactionData {
+  """
+  Const string “blockmetadata”
+  """
+  type: String!
+  """
+  Timestamp for the current block, in microseconds
+  """
+  timestampUsecs: Int64!
+}
+
+"""
+A Libra network transaction that modifies storage data directly. Currently, no details are exposed in the API.
+"""
+type WriteSetTransaction implements TransactionData {
+  """
+  Const string “writeset”
+  """
+  type: String!
+}
+
+"""
+Metadata for unsupported transaction types
+"""
+interface UserTransactionScript {
+  """
+  Const string “unknown”
+  """
+  type: String!
+}
+
+"""
+Transaction script for peer-to-peer transfer of resource
+"""
+type PeerToPeerTransferScript implements UserTransactionScript {
+  """
+  Const string “peer_to_peer_transaction”
+  """
+  type: String!
+  """
+  The receiver libra address
+  """
+  receiver: HexString!
+  """
+  The auth_key_prefix
+  """
+  authKeyPrefix: HexString!
+  """
+  The amount of microlibras being sent
+  """
+  amount: Int64!
+  """
+  The metadata supplied
+  """
+  metadata: HexString!
+}
+
+"""
+Transaction script for a special transaction used by the faucet to mint Libra and send to a user.
+"""
+type MintScript implements UserTransactionScript {
+  """
+  Const string “mint_transaction”
+  """
+  type: String!
+  """
+  The receiver libra address
+  """
+  receiver: HexString!
+  """
+  The auth_key_prefix
+  """
+  authKeyPrefix: HexString!
+  """
+  The amount of microlibras being sent
+  """
+  amount: Int64!
+}
+
+"""
+Currently unsupported transaction script
+"""
+type UnknownScript implements UserTransactionScript {
+  """
+  Const string “unknown_transaction”
+  """
+  type: String!
+}
+
+"""
+User submitted transaction.
+"""
+type UserTransaction implements TransactionData {
+  """
+  Const string “user”
+  """
+  type: String!
+  """
+  Hex-encoded account address of the sender
+  """
+  sender: HexString!
+  """
+  Signature scheme used to sign this transaction
+  """
+  signatureScheme: String!
+  """
+  Hex-encoded signature of this transaction
+  """
+  signature: HexString!
+  """
+  Hex-encoded public key of the transaction sender
+  """
+  publicKey: HexString!
+  """
+  Sequence number of this transaction corresponding to sender's account
+  """
+  sequenceNumber: Int64!
+  """
+  Maximum amount of gas that can be spent for this transaction
+  """
+  maxGasAmount: Int64!
+  """
+  Maximum gas price to be paid per unit of gas
+  """
+  gasUnitPrice: Int64!
+  """
+  The expiration time (Unix Epoch in seconds) for this transaction
+  """
+  expirationTime: Int64!
+  """
+  Hex-encoded hash of the script used in this transaction
+  """
+  scriptHash: HexString!
+  """
+  The transaction script and arguments of this transaction, represented as one of PeerToPeerTransferScript, MintScript or UnknownScript.
+  """
+  script: UserTransactionScript!
+}
+
+"""
+Metadata for unsupported transaction types
+"""
+type UnknownTransaction implements TransactionData {
+  """
+  Const string “unknown”
+  """
+  type: String!
+}
+
+"""
+A transaction on the blockchain.
+"""
+type Transaction {
+  """
+  The on-chain version or unique identifier of this transaction
+  """
+  version: Int64!
+  """
+  List of associated events. Empty for no events
+  """
+  events: [Event!]!
+  """
+  Metadata for this transaction. Possible types are BlockMetadataTransaction, WriteSetTransaction, UserTransaction, UnknownTransaction.
+  """
+  transactionData: TransactionData!
+  """
+  Status code representing the result of the VM processing this transaction.
+  """
+  vmStatus: Int64!
+  """
+  Amount of gas used by this transaction
+  """
+  gasUsed: Int64!
+}
+
+type Query {
+  """
+  Get the latest account state for a given account.
+  """
+  accountState(
+    """
+    Hex-encoded account address.
+    """
+    account: HexString!
+  ): Account
+  """
+  Get the transaction sent by the account with the given sequence number
+  """
+  accountTransaction(
+    """
+    The account address, a hex-encoded string
+    """
+    account: HexString!
+    """
+    The account sequence number
+    """
+    sequence: Int64!
+    """
+    Set to true to also fetch events generated by the transaction
+    """
+    includeEvents: Boolean
+  ): Transaction
+  """
+  Fetch the events for a given event stream.
+  """
+  events(
+    """
+    Globally unique identifier of an event stream.
+    Note: For sent and received events, a client can use accountState to get the event key of the event streams for a given user.
+    """
+    key: ID!
+
+    """
+    Start at the event with this sequence number
+    """
+    start: Int!
+
+    """
+    Maximum number of events retrieved
+    """
+    limit: Int!
+  ): [Event!]!
+  """
+  Get the current blockchain metadata (e.g., current state of a Libra full node).
+  You can use this endpoint to verify liveness / status of nodes in the network:
+  metadata returns the latest transaction version and the block timestamp. If the timestamp or version is old (from the past), it means that the full node is not not up-to-date.
+  """
+  metadata: Metadata!
+  """
+  Get the transactions on the blockchain
+  """
+  transactions(
+    """
+    Start on this transaction version for this query
+    """
+    startVersion: Int64!
+    """
+    Limit the number of transactions returned
+    """
+    limit: Int64!
+    """
+    Set to true, to also fetch events for each transaction
+    """
+    includeEvents: Boolean
+  ): [Transaction!]!
+}
+
+"""
+A Primitive or Structured value that contains additional information about the error.
+The value of this member is defined by the Server (e.g. detailed error information, nested errors etc.).
+"""
+scalar ErrorData
+
+"""
+A generic JSON-RPC error payload
+see: https://www.jsonrpc.org/specification#error_object
+"""
+type ErrorPayload {
+  """
+  A Number that indicates the error type that occurred.
+  """
+  code: Int!
+  """
+  A String providing a short description of the error.
+  """
+  message: String!
+  """
+  A Primitive or Structured value that contains additional information about the error.
+  The value of this member is defined by the Server (e.g. detailed error information, nested errors etc.).
+  """
+  data: ErrorData
+}
+
+"""
+Input args for submitTransaction.
+"""
+input SubmitTransactionInput {
+  """
+  Signed transaction data - hex-encoded bytes of serialized Libra SignedTransaction type.
+  """
+  data: HexString!
+}
+
+type Mutation {
+  """
+  Submit a signed transaction to a full node.
+  """
+  submitTransaction(
+    """
+    Input args for submitTransaction.
+    """
+    input: SubmitTransactionInput!
+  ): ErrorPayload
+}
