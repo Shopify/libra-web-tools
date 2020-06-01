@@ -1,4 +1,5 @@
 import {Client, HTTPTransport, RequestManager} from '@open-rpc/client-js';
+import fetch from 'isomorphic-fetch';
 
 import {LibraNetwork} from './types';
 
@@ -37,6 +38,60 @@ export function createLibraRpc(target: string) {
   };
 }
 
+export function createLibraFaucet(target: string) {
+  const id = 'faucet';
+  const baseUri = KnownFaucets[target] || target;
+
+  /* eslint-disable @typescript-eslint/camelcase */
+  function buildFaucetParams(
+    auth_key: string,
+    amount: number,
+    currency_code = 'LBR',
+  ) {
+    return {
+      amount: String(amount),
+      auth_key,
+      currency_code,
+    };
+  }
+  /* eslint-enable @typescript-eslint/camelcase */
+
+  return async function faucet(
+    authKey: string,
+    amountInMicroLibras: number,
+    currencyCode?: string,
+  ) {
+    const params = buildFaucetParams(
+      authKey,
+      amountInMicroLibras,
+      currencyCode,
+    );
+
+    try {
+      // logOperation(Operation.Request, id, params);
+
+      const uri = `${baseUri}?${new URLSearchParams(params)}`;
+
+      const response = await fetch(uri, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      logOperation(Operation.Response, id, params, data);
+
+      return data;
+    } catch (error) {
+      logOperation(Operation.Error, id, params, error);
+
+      throw error;
+    }
+  };
+}
+
 enum Operation {
   Request = '→',
   Response = '←',
@@ -63,4 +118,8 @@ function logOperation(
 
 export const KnownNetworks = {
   [LibraNetwork.Testnet]: 'https://client.testnet.libra.org',
+};
+
+export const KnownFaucets = {
+  [LibraNetwork.Testnet]: 'http://faucet.testnet.libra.org',
 };

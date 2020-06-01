@@ -3,6 +3,11 @@ import {IResolvers} from '@graphql-tools/utils';
 
 export interface Context {
   rpc: Client['request'];
+  faucet(
+    authKey: string,
+    amountInMicroLibras: number,
+    currencyCode?: string,
+  ): Promise<any>;
 }
 
 export type Resolvers = IResolvers<any, Context>;

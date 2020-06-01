@@ -30,8 +30,106 @@ fragment accountFields on Account {
   receivedEventsKey
 }
 
+fragment eventDataFields on EventData {
+  __typename
+  type
+
+  ... on ReceivedPaymentEventData {
+    amount {
+      ...amountFields
+    }
+    sender
+    metadata
+  }
+
+  ... on SentPaymentEventData {
+    amount {
+      ...amountFields
+    }
+  }
+
+  ... on NewBlockEventData {
+    proposedTime
+    proposer
+    round
+  }
+
+  ... on MintEventData {
+    amount {
+      ...amountFields
+    }
+  }
+}
+
+fragment eventFields on Event {
+  key
+  sequenceNumber
+  transactionVersion
+  data {
+    ...eventDataFields
+  }
+}
+
+fragment scriptFields on UserTransactionScript {
+  __typename
+  type
+
+  ... on MintScript {
+    receiver
+    authKeyPrefix
+    amount
+  }
+
+  ... on PeerToPeerTransferScript {
+    receiver
+    authKeyPrefix
+    amount
+    metadata
+  }
+}
+
+fragment transactionDataFields on TransactionData {
+  __typename
+  type
+
+  ... on BlockMetadataTransactionData {
+    timestampUsecs
+  }
+
+  ... on UserTransactionData {
+    sender
+    signatureScheme
+    signature
+    publicKey
+    sequenceNumber
+    maxGasAmount
+    gasUnitPrice
+    expirationTime
+    scriptHash
+    script {
+      ...scriptFields
+    }
+  }
+}
+
+fragment transactionFields on Transaction {
+  version
+  vmStatus
+  gasUsed
+  data {
+    ...transactionDataFields
+  }
+  events {
+    ...eventFields
+  }
+}
+
 query LibraTestnetStatus(
   $account: HexString!
+  $sentKey: ID!
+  $receivedKey: ID!
+  $transactionSequence: Int64!
+  $transactionVersion: Int64!
 ) {
   metadata {
     version
@@ -40,6 +138,36 @@ query LibraTestnetStatus(
   accountState(account: $account) {
     ...accountFields
   }
+  accountTransaction(
+    account: $account
+    sequence: $transactionSequence
+    includeEvents: true
+  ) {
+    ...transactionFields
+  }
+  sent: events(key: $sentKey, start: 0, limit: 10) {
+    ...eventFields
+  }
+  received: events(key: $receivedKey, start: 0, limit: 10) {
+    ...eventFields
+  }
+  transactions(
+    startVersion: $transactionVersion
+    limit: 1
+    includeEvents: true
+  ) {
+    ...transactionFields
+  }
+}
+`.trim();
+const mintQuery = `
+mutation LibraMinter($authKey: HexString!) {
+  mint(
+    input: {
+      authKey: $authKey
+      amountInMicroLibras: 1000000
+    }
+  )
 }
 `.trim();
 
@@ -73,10 +201,20 @@ const server = new ApolloServer({
         variables: JSON.stringify(
           {
             ...wallet,
+            sentKey: '010000000000000011b57b9db55e734d2dde92d7cf89b261',
+            receivedKey: '000000000000000011b57b9db55e734d2dde92d7cf89b261',
+            transactionSequence: '0',
+            transactionVersion: '5126849',
           },
           null,
           2,
         ),
+      },
+      {
+        endpoint,
+        name: 'Libra Minter',
+        query: mintQuery,
+        variables: JSON.stringify(wallet, null, 2),
       },
     ],
   },
