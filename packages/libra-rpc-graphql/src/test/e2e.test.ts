@@ -2,8 +2,8 @@ import {ApolloClient} from 'apollo-client';
 import {InMemoryCache} from 'apollo-cache-inmemory';
 import gql from 'graphql-tag';
 
-import {createApolloLink} from '../link';
-import {LibraNetwork} from '../types';
+import {createApolloLink} from '../../dist/src/link';
+import {LibraNetwork} from '../../dist/src/types';
 
 describe('e2e', () => {
   it('can fetch metadata from a remote RPC server', async () => {
