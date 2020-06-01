@@ -1,0 +1,41 @@
+{
+  "name": "@shopify/libra-web-wallet-utils",
+  "version": "0.0.0",
+  "license": "MIT",
+  "description": "A collection of web utilities to work with libra wallets.",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "scripts": {
+    "build": "tsc --p tsconfig.json",
+    "wallet": "ts-node --transpile-only scripts/wallet.ts"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "@shopify:registry": "https://registry.npmjs.org"
+  },
+  "author": "Shopify Inc.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shopify/libra-web-tools.git",
+    "directory": "packages/libra-web-wallet-utils"
+  },
+  "bugs": {
+    "url": "https://github.com/Shopify/libra-web-tools/issues"
+  },
+  "homepage": "https://github.com/Shopify/libra-web-tools/blob/master/packages/libra-web-wallet-utils/README.md",
+  "dependencies": {
+    "bip39": "^3.0.0",
+    "elliptic": "^6.0.0",
+    "futoin-hkdf": "^1.0.0",
+    "pbkdf2": "^3.0.0",
+    "sha3": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/elliptic": "^6.0.0",
+    "@types/pbkdf2": "^3.0.0",
+    "protobufjs": "^6.0.0",
+    "ts-node": "^8.0.0"
+  },
+  "files": ["dist/*", "!tsconfig.tsbuildinfo"]
+}
