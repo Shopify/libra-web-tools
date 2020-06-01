@@ -21,6 +21,7 @@ Each package has its own `README` and documentation describing usage.
 | package |     |     |
 | ------- | --- | --- |
 | libra-rpc-graphql | [directory](packages/libra-rpc-graphql) | [![npm version](https://badge.fury.io/js/%40shopify%2Flibra-rpc-graphql.svg)](https://badge.fury.io/js/%40shopify%2Flibra-rpc-graphql) |
+| libra-web-wallet-utils | [directory](packages/libra-web-wallet-utils) | [![npm version](https://badge.fury.io/js/%40shopify%2Flibra-web-wallet-utils.svg)](https://badge.fury.io/js/%40shopify%2Flibra-web-wallet-utils) |
 
 ## Want to contribute?
 
