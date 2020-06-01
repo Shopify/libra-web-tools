@@ -2,7 +2,7 @@ name: libra-web-tools
 type: node
 up:
   - node:
-      version: v10.18.0
+      version: v12.13.1
       yarn: 1.21.1
 commands:
   __default__: start
