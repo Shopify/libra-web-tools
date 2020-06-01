@@ -6,6 +6,10 @@ scalar Int64
 A hex-encoded string
 """
 scalar HexString
+"""
+Currency code
+"""
+scalar CurrencCode
 
 """
 Amount in a specific currency.
@@ -16,9 +20,9 @@ type Amount {
   """
   amount: Int64!
   """
-  currency string identifier
+  currency code
   """
-  currency: String!
+  currency: CurrencCode!
 }
 
 """
@@ -40,11 +44,11 @@ type Account {
   """
   If true, another account has the ability to withdraw funds from this account.
   """
-  delegatedWithdrawalCapacity: Boolean!
+  delegatedWithdrawalCapability: Boolean!
   """
   Balance of given account
   """
-  balance: Amount!
+  balances: [Amount!]!
   """
   Unique key for the sent events stream of this account
   """
@@ -68,7 +72,7 @@ interface EventData {
 """
 Event emitted when an account received a payment.
 """
-type ReceivedPaymentEvent implements EventData {
+type ReceivedPaymentEventData implements EventData {
   """
   Const string “receivedpayment”
   """
@@ -91,7 +95,7 @@ type ReceivedPaymentEvent implements EventData {
 """
 Event emitted when an account sends a payment.
 """
-type SentPaymentEvent implements EventData {
+type SentPaymentEventData implements EventData {
   """
   Const string “sentpayment”
   """
@@ -111,10 +115,43 @@ type SentPaymentEvent implements EventData {
   metadata: HexString
 }
 
+type NewBlockEventData implements EventData {
+  """
+  Const string “newblock”
+  """
+  type: String!
+  """
+  Proposed time in microseconds
+  """
+  proposedTime: Int64!
+  """
+  Address of new block proposer
+  """
+  proposer: HexString!
+  """
+  ??? sequence or transaction version number?
+  """
+  round: Int
+}
+
+"""
+Mint event data.
+"""
+type MintEventData implements EventData {
+  """
+  Const string “mint”
+  """
+  type: String!
+  """
+  Mint amount
+  """
+  amount: Amount!
+}
+
 """
 Represents events currently unsupported by JSON-RPC API.
 """
-type UnknownEvent implements EventData {
+type UnknownEventData implements EventData {
   """
   Const string “unknown”
   """
@@ -132,13 +169,13 @@ type Event {
   """
   Sequence number of the current event in the given even stream
   """
-  sequenceNumber: Int!
+  sequenceNumber: Int
   """
   Version of the transaction that emitted this event
   """
-  transactionVersion: Int!
+  transactionVersion: Int
   """
-  ReceivedPayment or SentPayment or UnknownEvent object
+  ReceivedPaymentEventData, SentPaymentEventData, NewBlockEventData, MintEventData, or UnknownEventData object
   """
   data: EventData!
 }
@@ -158,7 +195,7 @@ type Metadata {
 }
 
 """
-Metadata for this transaction. Possible types are BlockMetadataTransaction, WriteSetTransaction, UserTransaction, UnknownTransaction.
+Metadata for this transaction. Possible types are BlockMetadataTransactionData, WriteSetTransactionData, UserTransactionData, UnknownTransactionData.
 """
 interface TransactionData {
   """
@@ -170,7 +207,7 @@ interface TransactionData {
 """
 A Libra network transaction that contains the metadata for the block. This transaction is always at the beginning of a block.
 """
-type BlockMetadataTransaction implements TransactionData {
+type BlockMetadataTransactionData implements TransactionData {
   """
   Const string “blockmetadata”
   """
@@ -184,7 +221,7 @@ type BlockMetadataTransaction implements TransactionData {
 """
 A Libra network transaction that modifies storage data directly. Currently, no details are exposed in the API.
 """
-type WriteSetTransaction implements TransactionData {
+type WriteSetTransactionData implements TransactionData {
   """
   Const string “writeset”
   """
@@ -214,7 +251,7 @@ type PeerToPeerTransferScript implements UserTransactionScript {
   """
   receiver: HexString!
   """
-  The auth_key_prefix
+  The auth key prefix
   """
   authKeyPrefix: HexString!
   """
@@ -262,7 +299,7 @@ type UnknownScript implements UserTransactionScript {
 """
 User submitted transaction.
 """
-type UserTransaction implements TransactionData {
+type UserTransactionData implements TransactionData {
   """
   Const string “user”
   """
@@ -304,7 +341,7 @@ type UserTransaction implements TransactionData {
   """
   scriptHash: HexString!
   """
-  The transaction script and arguments of this transaction, represented as one of PeerToPeerTransferScript, MintScript or UnknownScript.
+  The transaction script and arguments of this transaction, represented as one of PeerToPeerTransferScript, MintScript, or UnknownScript.
   """
   script: UserTransactionScript!
 }
@@ -312,7 +349,7 @@ type UserTransaction implements TransactionData {
 """
 Metadata for unsupported transaction types
 """
-type UnknownTransaction implements TransactionData {
+type UnknownTransactionData implements TransactionData {
   """
   Const string “unknown”
   """
@@ -332,9 +369,9 @@ type Transaction {
   """
   events: [Event!]!
   """
-  Metadata for this transaction. Possible types are BlockMetadataTransaction, WriteSetTransaction, UserTransaction, UnknownTransaction.
+  Metadata for this transaction. Possible types are BlockMetadataTransactionData, WriteSetTransactionData, UserTransactionData, or UnknownTransactionData.
   """
-  transactionData: TransactionData!
+  data: TransactionData!
   """
   Status code representing the result of the VM processing this transaction.
   """
@@ -418,29 +455,27 @@ type Query {
 }
 
 """
-A Primitive or Structured value that contains additional information about the error.
-The value of this member is defined by the Server (e.g. detailed error information, nested errors etc.).
+Some mutation do not return anything on success, this scalar represents a
+nothing return.
 """
-scalar ErrorData
+scalar MutationSuccess
 
 """
-A generic JSON-RPC error payload
-see: https://www.jsonrpc.org/specification#error_object
+Input args for mint.
 """
-type ErrorPayload {
+input MintInput {
   """
-  A Number that indicates the error type that occurred.
+  Address where to send minted libra
   """
-  code: Int!
+  authKey: HexString!
   """
-  A String providing a short description of the error.
+  Amount of libra to mint in microlibra
   """
-  message: String!
+  amountInMicroLibras: Int64!
   """
-  A Primitive or Structured value that contains additional information about the error.
-  The value of this member is defined by the Server (e.g. detailed error information, nested errors etc.).
+  Currency to mint (defaults to LBR)
   """
-  data: ErrorData
+  currencyCode: CurrencCode
 }
 
 """
@@ -455,6 +490,16 @@ input SubmitTransactionInput {
 
 type Mutation {
   """
+  Mint libra.
+  returns the next transaction sequence number corresponding to minter's account
+  """
+  mint(
+    """
+    Input args for mint.
+    """
+    input: MintInput!
+  ): Int!
+  """
   Submit a signed transaction to a full node.
   """
   submitTransaction(
@@ -462,5 +507,5 @@ type Mutation {
     Input args for submitTransaction.
     """
     input: SubmitTransactionInput!
-  ): ErrorPayload
+  ): MutationSuccess
 }

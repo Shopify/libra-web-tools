@@ -22,7 +22,9 @@
     "clean": "rimraf './packages/*/dist'",
     "generate": "plop",
     "generate:package": "plop package && yarn plop docs",
-    "tophat": "tophat"
+    "tophat": "tophat",
+    "graphiql": "yarn --cwd packages/libra-rpc-graphql run start",
+    "graphql": "yarn run graphiql"
   },
   "repository": {
     "type": "git",

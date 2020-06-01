@@ -7,7 +7,7 @@ export function mapResolvers(resolvers: Record<string, ResolverInfo<any>>) {
       [fieldName, {method, mapArgs}]: [string, ResolverInfo],
     ) => {
       resolvers[fieldName] = (_source, args, {rpc}) =>
-        rpc.request(method, mapArgs ? mapArgs(args) : []);
+        rpc(method, mapArgs && mapArgs(args));
       return resolvers;
     },
     {},
