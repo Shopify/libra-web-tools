@@ -6,7 +6,7 @@ import {GraphQLSchema} from 'graphql';
 
 import {typeDefs} from './graphql';
 import {resolvers} from './resolvers';
-import {createLibraRpc} from './client';
+import {createLibraRpc, createLibraFaucet} from './client';
 import {Context} from './types';
 
 export function addFieldRenameResolversToSchema(schema: GraphQLSchema) {
@@ -41,6 +41,7 @@ export const schema = addFieldRenameResolversToSchema(
 export function createContext(target: string): Context {
   return {
     rpc: createLibraRpc(target),
+    faucet: createLibraFaucet(target),
   };
 }
 
