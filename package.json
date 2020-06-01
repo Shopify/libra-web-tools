@@ -24,7 +24,8 @@
     "generate:package": "plop package && yarn plop docs",
     "tophat": "tophat",
     "graphiql": "yarn --cwd packages/libra-rpc-graphql run start",
-    "graphql": "yarn run graphiql"
+    "graphql": "yarn run graphiql",
+    "wallet": "yarn --cwd packages/libra-web-wallet-utils wallet"
   },
   "repository": {
     "type": "git",

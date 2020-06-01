@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package types;
+
+// A generic structure that describes a transaction that a client submits
+message RawTransaction {
+    // Sender's account address
+    bytes sender_account = 1;
+    // Sequence number of this transaction corresponding to sender's account.
+    uint64 sequence_number = 2 [jstype = JS_STRING];
+    // The transaction script to execute.
+    Program payload =  3;
+    // Maximal total gas specified by wallet to spend for this transaction.
+    uint64 max_gas_amount = 4 [jstype = JS_STRING];
+    // The price to be paid for each unit of gas.
+    uint64 gas_unit_price = 5 [jstype = JS_STRING];
+    // Expiration time for this transaction.  If storage is queried and
+    // the time returned is greater than or equal to this time and this
+    // transaction has not been included, you can be certain that it will
+    // never be included.
+    // If set to 0, there will be no expiration time
+    uint64 expiration_time = 6 [jstype = JS_STRING];
+}
+
+// The code for the transaction to execute
+message Program {
+    bytes code = 1;
+    repeated TransactionArgument arguments = 2;
+    repeated bytes modules = 3;
+}
+
+// An argument to the transaction if the transaction takes arguments
+message TransactionArgument {
+    enum ArgType {
+        U64 = 0;
+        ADDRESS = 1;
+        STRING = 2;
+        BYTEARRAY = 3;
+    }
+    ArgType type = 1;
+    bytes data = 2;
+}
+
+message Authenticator {
+    // public key that corresponds to RawTransaction::sender_account
+    bytes sender_public_key = 1 [jstype = JS_STRING];
+    // signature for the hash
+    bytes sender_signature = 2 [jstype = JS_STRING];
+}
+
+// A generic structure that represents signed RawTransaction
+message SignedTransaction {
+    // The serialized Protobuf bytes for RawTransaction, for which the signature
+    // was signed. Protobuf doesn't guarantee the serialized bytes is canonical
+    // across different language implementations, but for our use cases for
+    // transaction it is not necessary because the client is the only one to
+    // produce this bytes, which is then persisted in storage.
+    bytes raw_txn_bytes = 1 [jstype = JS_STRING];
+    Authenticator authenticator = 2;
+}

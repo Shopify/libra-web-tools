@@ -1,5 +1,8 @@
 {
   "files": [],
   "include": [],
-  "references": [{"path": "./libra-rpc-graphql"}]
+  "references": [
+    {"path": "./libra-rpc-graphql"},
+    {"path": "./libra-web-wallet-utils"}
+  ]
 }
