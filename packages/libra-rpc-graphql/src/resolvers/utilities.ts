@@ -4,10 +4,17 @@ export function mapResolvers(resolvers: Record<string, ResolverInfo<any>>) {
   return Object.entries(resolvers).reduce(
     (
       resolvers: Resolvers,
-      [fieldName, {method, mapArgs}]: [string, ResolverInfo],
+      [fieldName, {method, mapArgs, transform}]: [string, ResolverInfo],
     ) => {
-      resolvers[fieldName] = (_source, args, {rpc}) =>
-        rpc(method, mapArgs && mapArgs(args));
+      resolvers[fieldName] = async (_source, args, {rpc}) => {
+        const result = await rpc(method, mapArgs && mapArgs(args));
+
+        if (!transform) {
+          return result;
+        }
+
+        return transform(result, args);
+      };
       return resolvers;
     },
     {},

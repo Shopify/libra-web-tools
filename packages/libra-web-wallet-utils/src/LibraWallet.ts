@@ -1,34 +1,39 @@
-import {
-  generateSeedPhrase,
-  generateSeedKey,
-  SeedKeyOptions,
-} from './generators';
+import {SeedKeyOptions} from './generators';
 import {LibraAccount} from './LibraAccount';
+import {LibraSeed, LibraSeedPhrase} from './LibraSeed';
 
-export class LibraWallet<Phrase = never> {
-  public static generate(options?: SeedKeyOptions) {
-    const phrase = generateSeedPhrase();
+interface KeyOrPhrase {
+  key?: string;
+  phrase?: string;
+}
 
-    return new LibraWallet<string>(
-      generateSeedKey(phrase, options).toString('hex'),
-      phrase,
-    );
+export class LibraWallet<Seed extends LibraSeed = LibraSeed> {
+  public static generate(keyOptions?: SeedKeyOptions) {
+    return new LibraWallet(LibraSeedPhrase.generate(keyOptions));
+  }
+
+  public static fromKeyOrPhrase({
+    key,
+    phrase,
+  }: KeyOrPhrase & {phrase: string}): LibraWallet<LibraSeedPhrase>;
+
+  public static fromKeyOrPhrase({key, phrase}: KeyOrPhrase): LibraWallet;
+
+  public static fromKeyOrPhrase({key, phrase}: KeyOrPhrase) {
+    if (phrase) {
+      return new LibraWallet(new LibraSeedPhrase(phrase));
+    }
+
+    return new LibraWallet(new LibraSeed(key || LibraSeed.generateKey()));
   }
 
   public readonly accounts: Record<number, LibraAccount> = {};
 
-  constructor(
-    public readonly seed: string,
-    private readonly _phrase?: string,
-  ) {}
-
-  get phrase(): Phrase {
-    return this._phrase as any;
-  }
+  constructor(public readonly seed: Seed) {}
 
   getAccount(index: number) {
     if (this.accounts[index] == null) {
-      this.accounts[index] = LibraAccount.fromSeed(this.seed, index);
+      this.accounts[index] = LibraAccount.fromSeed(this.seed.key, index);
     }
 
     return this.accounts[index];

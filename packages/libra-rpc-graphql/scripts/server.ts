@@ -2,187 +2,258 @@
 /* eslint-disable no-console, no-process-env */
 
 import express from 'express';
-import {ApolloServer} from 'apollo-server-express';
+import {ApolloServer, PlaygroundRenderPageOptions} from 'apollo-server-express';
+import {print} from 'graphql';
+import gql from 'graphql-tag';
 
 import {createContext, schema} from '../src/link';
 import {LibraNetwork} from '../src/types';
 
-const {PORT = 8000} = process.env;
+const {HOST = 'localhost', PORT = 8000} = process.env;
 const [target = LibraNetwork.Testnet] = process.argv.slice(2);
 
 const app = express();
 
-const testQuery = `
-fragment amountFields on Amount {
-  amount
-  currency
-}
+const path = '/graphql';
+const endpoint = `http://${HOST}:${PORT}${path}`;
 
-fragment accountFields on Account {
-  sequenceNumber
-  authenticationKey
-  delegatedKeyRotationCapability
-  delegatedWithdrawalCapability
-  balances {
-    ...amountFields
-  }
-  sentEventsKey
-  receivedEventsKey
-}
+// these variables are the result of the wallet query
+const variables = {
+  phrase:
+    'resource setup claim iron carpet east dose truck dry file olympic february own federal pioneer total candy beef usage heart relax dance library height',
+  key: 'f080ac2748fde3a53318492f8466b200b39afc3b09a496433db6dcca1243953d',
+  secretKey: '81212144b0f8358aaa94ff5f595d5a1274527ce325ff508fe27748e607850463',
+  publicKey: 'dc741284bd42ec0c9250706c4bbe9a651fe8b1ba2cd5b28f9b09f813cb02f3e1',
+  authKey: '239ed09c441bb3307b3c5abc878879581d0a20b6462d3e8dbb21784b1f1314e9',
+  address: '1d0a20b6462d3e8dbb21784b1f1314e9',
+};
 
-fragment eventDataFields on EventData {
-  __typename
-  type
-
-  ... on ReceivedPaymentEventData {
-    amount {
-      ...amountFields
+const queries = gql`
+  query LibraTestnet($phrase: String!, $address: HexString!) {
+    wallet(phrase: $phrase) {
+      seed {
+        phrase
+        key
+      }
+      account {
+        secretKey
+        publicKey
+        authKey
+        address
+      }
     }
-    sender
-    metadata
-  }
-
-  ... on SentPaymentEventData {
-    amount {
-      ...amountFields
+    received: accountState(address: $address) {
+      receivedEvents {
+        ...receivedEventFields
+      }
+    }
+    sent: accountState(address: $address) {
+      sentEvents {
+        ...sentEventFields
+      }
+    }
+    transactions: accountState(address: $address) {
+      transactions {
+        version
+        hash
+        vmStatus
+        gasUsed
+        data {
+          __typename
+          ... on UserTransactionData {
+            ...userTransactionFields
+          }
+        }
+      }
     }
   }
 
-  ... on NewBlockEventData {
-    proposedTime
-    proposer
-    round
-  }
-
-  ... on MintEventData {
-    amount {
-      ...amountFields
-    }
-  }
-}
-
-fragment eventFields on Event {
-  key
-  sequenceNumber
-  transactionVersion
-  data {
-    ...eventDataFields
-  }
-}
-
-fragment scriptFields on UserTransactionScript {
-  __typename
-  type
-
-  ... on MintScript {
-    receiver
-    authKeyPrefix
+  fragment amountFields on Amount {
     amount
+    currency
   }
 
-  ... on PeerToPeerTransferScript {
-    receiver
-    authKeyPrefix
-    amount
+  fragment accountFields on AccountState {
+    sequenceNumber
+    address
+    authenticationKey
+    balances {
+      ...amountFields
+    }
+  }
+
+  fragment sentEventDataFields on SentPaymentEventData {
+    amount {
+      ...amountFields
+    }
     metadata
-  }
-}
-
-fragment transactionDataFields on TransactionData {
-  __typename
-  type
-
-  ... on BlockMetadataTransactionData {
-    timestampUsecs
+    receiver {
+      ...accountFields
+    }
   }
 
-  ... on UserTransactionData {
-    sender
+  fragment receivedEventDataFields on ReceivedPaymentEventData {
+    amount {
+      ...amountFields
+    }
+    metadata
+    sender {
+      ...accountFields
+    }
+  }
+
+  fragment eventFields on Event {
+    sequenceNumber
+    transaction(includeEvents: true) {
+      version
+      hash
+      vmStatus
+      gasUsed
+      data {
+        ...userTransactionFields
+      }
+      events {
+        data {
+          __typename
+          ... on MintEventData {
+            amount {
+              ...amountFields
+            }
+          }
+        }
+      }
+    }
+    data {
+      __typename
+    }
+  }
+
+  fragment receivedEventFields on Event {
+    ...eventFields
+    transaction(includeEvents: true) {
+      events {
+        data {
+          ... on SentPaymentEventData {
+            ...sentEventDataFields
+          }
+        }
+      }
+    }
+    data {
+      ... on ReceivedPaymentEventData {
+        ...receivedEventDataFields
+      }
+    }
+  }
+
+  fragment sentEventFields on Event {
+    ...eventFields
+    transaction(includeEvents: true) {
+      events {
+        data {
+          ... on ReceivedPaymentEventData {
+            ...receivedEventDataFields
+          }
+        }
+      }
+    }
+    data {
+      ... on SentPaymentEventData {
+        ...sentEventDataFields
+      }
+    }
+  }
+
+  fragment userTransactionFields on UserTransactionData {
     signatureScheme
     signature
     publicKey
     sequenceNumber
     maxGasAmount
     gasUnitPrice
+    gasCurrency
     expirationTime
     scriptHash
     script {
-      ...scriptFields
+      __typename
+      ... on MintScript {
+        receiver {
+          ...accountFields
+        }
+        amount
+      }
+      ... on PeerToPeerTransferScript {
+        receiver {
+          ...accountFields
+        }
+        amount
+        currency
+        metadata
+        metadataSignature
+      }
     }
   }
-}
+`;
 
-fragment transactionFields on Transaction {
-  version
-  vmStatus
-  gasUsed
-  data {
-    ...transactionDataFields
-  }
-  events {
-    ...eventFields
-  }
-}
-
-query LibraTestnetStatus(
-  $account: HexString!
-  $sentKey: ID!
-  $receivedKey: ID!
-  $transactionSequence: Int64!
-  $transactionVersion: Int64!
-) {
-  metadata {
-    version
-    timestamp
-  }
-  accountState(account: $account) {
-    ...accountFields
-  }
-  accountTransaction(
-    account: $account
-    sequence: $transactionSequence
-    includeEvents: true
-  ) {
-    ...transactionFields
-  }
-  sent: events(key: $sentKey, start: 0, limit: 10) {
-    ...eventFields
-  }
-  received: events(key: $receivedKey, start: 0, limit: 10) {
-    ...eventFields
-  }
-  transactions(
-    startVersion: $transactionVersion
-    limit: 1
-    includeEvents: true
-  ) {
-    ...transactionFields
-  }
-}
-`.trim();
-const mintQuery = `
-mutation LibraMinter($authKey: HexString!) {
-  mint(
-    input: {
-      authKey: $authKey
-      amountInMicroLibras: 1000000
+const mutations = gql`
+  mutation LibraWallet {
+    createSeed {
+      phrase
+      key
+      wallet {
+        account {
+          authKey
+          address
+        }
+      }
     }
-  )
-}
-`.trim();
+  }
 
-const path = '/graphql';
-const endpoint = `http://localhost:${PORT}${path}`;
+  mutation LibraMint($authKey: HexString!) {
+    mint(
+      input: {authKey: $authKey, amountInMicroLibras: 1e6, currencyCode: "LBR"}
+    ) {
+      sequenceNumber
+      address
+      balances {
+        ...amountFields
+      }
+      receivedEvents {
+        key
+        sequenceNumber
+        transactionVersion
+        data {
+          ... on ReceivedPaymentEventData {
+            amount {
+              ...amountFields
+            }
+            senderAddress
+          }
+        }
+      }
+    }
+  }
 
-// these constants should be able to persist across any libra network deployment
-// use https://librapaperwallet.com/ to create your own or use the wallet script
-const wallet = {
-  seed:
-    'resource setup claim iron carpet east dose truck dry file olympic february own federal pioneer total candy beef usage heart relax dance library height',
-  authKey: 'c9741e82d947540bc585fe48b350948711b57b9db55e734d2dde92d7cf89b261',
-  // (last 32 chars of authKey)
-  account: '11b57b9db55e734d2dde92d7cf89b261',
-};
+  fragment amountFields on Amount {
+    amount
+    currency
+  }
+`;
+
+const tabs: PlaygroundRenderPageOptions['tabs'] = [
+  {
+    endpoint,
+    name: 'Libra Test Query',
+    query: print(queries),
+    variables: JSON.stringify(variables, null, 2),
+  },
+  {
+    endpoint,
+    name: 'Libra Mutations',
+    query: print(mutations),
+    variables: JSON.stringify(variables, null, 2),
+  },
+];
 
 const server = new ApolloServer({
   context: ({
@@ -190,38 +261,15 @@ const server = new ApolloServer({
       query: {network = target},
     },
   }) => createContext(network as string),
-  introspection: true,
+  // introspection: true,
 
   playground: {
-    tabs: [
-      {
-        endpoint,
-        name: 'Libra GraphQL Test Query',
-        query: testQuery,
-        variables: JSON.stringify(
-          {
-            ...wallet,
-            sentKey: '010000000000000011b57b9db55e734d2dde92d7cf89b261',
-            receivedKey: '000000000000000011b57b9db55e734d2dde92d7cf89b261',
-            transactionSequence: '0',
-            transactionVersion: '5126849',
-          },
-          null,
-          2,
-        ),
-      },
-      {
-        endpoint,
-        name: 'Libra Minter',
-        query: mintQuery,
-        variables: JSON.stringify(wallet, null, 2),
-      },
-    ],
+    tabs,
   },
   schema,
 });
 server.applyMiddleware({app, path});
 
 app.listen(PORT, () => {
-  console.log(`🚀 GraphiQL running at ${endpoint}`);
+  console.log(`🚀  GraphQL playground running at ${endpoint}`);
 });

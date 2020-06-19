@@ -6,7 +6,11 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "scripts": {
+    "prebuild": "yarn run protobuf-jsonify:transaction",
     "build": "tsc --p tsconfig.json",
+    "protobuf-jsonify": "node scripts/protobuf-jsonify.js",
+    "protobuf-jsonify:transaction": "yarn run protobuf-jsonify src/proto/transaction.proto",
+    "postbuild": "yarn run protobuf-jsonify:transaction && cp src/proto/transaction.proto.json dist/src/proto/transaction.proto.json",
     "wallet": "ts-node --transpile-only scripts/wallet.ts"
   },
   "sideEffects": false,

@@ -16,6 +16,12 @@ These libraries compose together to help you create performant modern JS apps th
 The `libra-web-tools` repo is managed as a monorepo that is composed of many npm packages.
 Each package has its own `README` and documentation describing usage.
 
+### Quickstart
+
+Using `dev` we can simply run `dev up && dev s` to get up and running, the GraphQL Playground will be available at http://localhost:8000/graphql
+
+Without `dev` we can instead run `yarn && yarn start` to get up and running.
+
 ### Package Index
 
 | package |     |     |
