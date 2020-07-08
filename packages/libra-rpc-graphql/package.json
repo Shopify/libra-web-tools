@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "license": "MIT",
   "description": "GraphQL utilities for connecting to the Libra network via the JSON-RPC API.",
+  "engines": {
+    "node": "~v12.13.1",
+    "yarn": "<=1.21.1"
+  },
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "scripts": {
