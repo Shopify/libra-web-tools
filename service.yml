@@ -1,7 +1,6 @@
 # https://services.shopify.io/services/libra-web-tools/production
 owners:
   - Shopify/libra
-  - patsissons
 classification: library
 ci_url: https://travis-ci.com/github/Shopify/libra-web-tools
 slack_channels:
