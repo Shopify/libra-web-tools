@@ -1,6 +1,6 @@
 {
   "name": "@shopify/libra-web-wallet-utils",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "license": "MIT",
   "description": "A collection of web utilities to work with libra wallets.",
   "main": "dist/src/index.js",
@@ -41,5 +41,8 @@
     "protobufjs": "^6.0.0",
     "ts-node": "^8.0.0"
   },
-  "files": ["dist/*", "!tsconfig.tsbuildinfo"]
+  "files": [
+    "dist/*",
+    "!tsconfig.tsbuildinfo"
+  ]
 }
