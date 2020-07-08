@@ -13,26 +13,38 @@ export class LibraAccount {
     return new LibraAccount(generateKeyPair(seed, index));
   }
 
-  constructor(public readonly keyPair: eddsa.KeyPair) {}
-
-  get publicKey() {
-    return this.keyPair.getPublic('hex');
+  public static keyPairParts(keyPair: eddsa.KeyPair) {
+    return {
+      secretKey: keyPair.getSecret('hex'),
+      publicKey: keyPair.getPublic('hex'),
+    };
   }
 
-  get secretKey() {
-    return this.keyPair.getSecret('hex');
+  public static publicAuthKey(publicKey: string) {
+    return sha3hash(publicKey).toString('hex');
   }
 
-  get address() {
-    return sha3hash(this.keyPair.getPublic()).toString('hex');
+  public static authKeyParts(authKey: string) {
+    return {
+      address: authKey.slice(-32),
+      authKeyPrefix: authKey.slice(0, 32),
+    };
   }
 
-  get authKeyPrefix() {
-    return this.address.slice(0, 32);
-  }
+  public readonly secretKey: string;
+  public readonly publicKey: string;
+  public readonly authKey: string;
+  public readonly authKeyPrefix: string;
+  public readonly address: string;
 
-  get shortAddress() {
-    return this.address.slice(-32);
+  constructor(public readonly keyPair: eddsa.KeyPair) {
+    const {secretKey, publicKey} = LibraAccount.keyPairParts(keyPair);
+    this.secretKey = secretKey;
+    this.publicKey = publicKey;
+    this.authKey = LibraAccount.publicAuthKey(publicKey);
+    const {authKeyPrefix, address} = LibraAccount.authKeyParts(this.authKey);
+    this.address = address;
+    this.authKeyPrefix = authKeyPrefix;
   }
 
   // NOTE: not working :(
@@ -61,8 +73,8 @@ export class LibraAccount {
     return [
       `     Secret Key: ${this.secretKey}`,
       `     Public Key: ${this.publicKey}`,
-      `       Auth Key: ${this.address}`,
-      `  Short Address: ${this.shortAddress}`,
+      `       Auth Key: ${this.authKey}`,
+      `        Address: ${this.address}`,
       `Auth Key Prefix: ${this.authKeyPrefix}`,
     ].join('\n');
   }

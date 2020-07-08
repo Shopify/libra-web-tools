@@ -1,8 +1,12 @@
 import {makeExecutableSchema} from '@graphql-tools/schema';
-import {forEachField} from '@graphql-tools/utils';
+import {
+  forEachField,
+  getUserTypesFromSchema,
+  appendObjectFields,
+} from '@graphql-tools/utils';
 import {ApolloLink} from 'apollo-link';
 import {SchemaLink} from 'apollo-link-schema';
-import {GraphQLSchema} from 'graphql';
+import {GraphQLField, GraphQLSchema, GraphQLScalarType} from 'graphql';
 
 import {typeDefs} from './graphql';
 import {resolvers} from './resolvers';
@@ -10,32 +14,50 @@ import {createLibraRpc, createLibraFaucet} from './client';
 import {Context} from './types';
 
 export function addFieldRenameResolversToSchema(schema: GraphQLSchema) {
-  const pattern = /[A-Z]/g;
-
   function camelCaseToSnakeCase(name: string) {
-    return name.replace(pattern, (match) => `_${match.toLowerCase()}`);
+    return name.replace(/[A-Z]/g, (match) => `_${match.toLowerCase()}`);
   }
 
-  function createFieldNameResolver(fieldName: string) {
+  function createFieldNameResolver({name}: GraphQLField<any, any>) {
     return function resolver(source: any) {
-      return source[fieldName];
+      const snakeCaseFieldName = camelCaseToSnakeCase(name);
+      return snakeCaseFieldName in source
+        ? source[snakeCaseFieldName]
+        : source[name];
     };
   }
 
   forEachField(schema, (field) => {
-    if (field.resolve == null && pattern.test(field.name)) {
-      field.resolve = createFieldNameResolver(camelCaseToSnakeCase(field.name));
+    if (field.resolve == null && /[A-Z]/.test(field.name)) {
+      field.resolve = createFieldNameResolver(field);
     }
   });
 
   return schema;
 }
 
-export const schema = addFieldRenameResolversToSchema(
-  makeExecutableSchema({
-    typeDefs,
-    resolvers,
-  }),
+export function addDumpFieldToSchema(schema: GraphQLSchema) {
+  const raw = schema.getType('Raw') as GraphQLScalarType;
+
+  return getUserTypesFromSchema(schema).reduce((schema, type) => {
+    const config = type.toConfig();
+    return appendObjectFields(schema, type.name, {
+      ...config.fields,
+      _dump: {
+        type: raw,
+        resolve: (data) => data,
+      },
+    });
+  }, schema);
+}
+
+export const schema = addDumpFieldToSchema(
+  addFieldRenameResolversToSchema(
+    makeExecutableSchema({
+      typeDefs,
+      resolvers,
+    }),
+  ),
 );
 
 export function createContext(target: string): Context {

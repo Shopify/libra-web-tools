@@ -1,7 +1,7 @@
 import {Client, HTTPTransport, RequestManager} from '@open-rpc/client-js';
 import fetch from 'isomorphic-fetch';
 
-import {LibraNetwork} from './types';
+import {LibraNetwork, LibraRPCMethods} from './types';
 
 export function createClient(target: string) {
   const uri = KnownNetworks[target] || target;
@@ -13,7 +13,7 @@ export function createLibraRpc(target: string) {
   const client = createClient(target);
 
   return async function rpc(
-    method: string,
+    method: LibraRPCMethods,
     params: any[] = [],
     timeout?: number,
   ) {

@@ -20,7 +20,7 @@ const [command = 'help', ...args] = process.argv.slice(2);
 function help() {
   const actions = [
     'seed[:{phrase|words|key|all}]',
-    'account[:{seed|secret|public|address|all}] [seed|...phrase] [index]',
+    'account[:{seed|secret|public|authKey|address|all}] [seed|...phrase] [index]',
     'transfer[:payload|debug] {fromSecretKey} {toAddress} {amount} {sequenceNumber}',
   ];
   console.log(
@@ -51,7 +51,7 @@ export function account(args: string[] = []) {
     if (args.length <= 2) {
       const [seed = generateSeedKey().toString('hex'), index = '0'] = args;
 
-      return {seed, index};
+      return {seed, index: Number(index)};
     }
 
     const index = Number(args[args.length - 1]);
@@ -62,13 +62,13 @@ export function account(args: string[] = []) {
     return {
       phrase,
       seed,
-      index: hasIndex ? String(index) : '0',
+      index: hasIndex ? index : 0,
     };
   }
 
   const {index, phrase, seed} = parseSeed();
-  const keyPair = generateKeyPair(seed, Number(index));
-  const address = sha3hash(keyPair.getPublic()).toString('hex');
+  const keyPair = generateKeyPair(seed, index);
+  const authKey = sha3hash(keyPair.getPublic()).toString('hex');
 
   const details = {
     phrase,
@@ -76,19 +76,19 @@ export function account(args: string[] = []) {
     index,
     secret: keyPair.getSecret('hex'),
     public: keyPair.getPublic('hex'),
-    address,
-    short: address.slice(-32),
-    prefix: address.slice(0, 32),
+    authKey,
+    address: authKey.slice(-32),
+    authKeyPrefix: authKey.slice(0, 32),
   };
   const all = [
-    ` Phrase: ${phrase || 'N/A'}`,
-    `   Seed: ${seed}`,
-    `  Index: ${index}`,
-    ` Secret: ${details.secret}`,
-    ` Public: ${details.public}`,
-    `Address: ${details.address}`,
-    `  Short: ${details.short}`,
-    ` Prefix: ${details.prefix}`,
+    `         Phrase: ${phrase || 'N/A'}`,
+    `           Seed: ${seed}`,
+    `          Index: ${index}`,
+    `         Secret: ${details.secret}`,
+    `         Public: ${details.public}`,
+    `       Auth Key: ${details.authKey}`,
+    `        Address: ${details.address}`,
+    `Auth Key Prefix: ${details.authKeyPrefix}`,
   ].join('\n');
 
   return {

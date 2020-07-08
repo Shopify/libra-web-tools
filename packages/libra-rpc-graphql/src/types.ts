@@ -1,8 +1,16 @@
-import {Client} from '@open-rpc/client-js';
 import {IResolvers} from '@graphql-tools/utils';
 
+export type LibraRPCMethods =
+  | 'get_account_state'
+  | 'get_account_transaction'
+  | 'get_currencies'
+  | 'get_events'
+  | 'get_metadata'
+  | 'get_transactions'
+  | 'submit';
+
 export interface Context {
-  rpc: Client['request'];
+  rpc(method: LibraRPCMethods, params?: any[], timeout?: number): Promise<any>;
   faucet(
     authKey: string,
     amountInMicroLibras: number,
@@ -13,8 +21,9 @@ export interface Context {
 export type Resolvers = IResolvers<any, Context>;
 
 export interface ResolverInfo<Args = {}> {
-  method: string;
+  method: LibraRPCMethods;
   mapArgs?(args: Args): any[];
+  transform?(result: any, args: Args): any;
 }
 
 export enum LibraNetwork {

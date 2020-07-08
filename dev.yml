@@ -5,10 +5,12 @@ up:
       version: v12.13.1
       yarn: 1.21.1
 commands:
-  __default__: start
+  __default__: server
   build: yarnpkg build
   check: yarnpkg check
   lint: yarnpkg lint
-  start: echo "Running libra-web-tools is not really a concept that makes sense."
+  server:
+    aliases: [start, s]
+    run: yarnpkg playground
   test: yarnpkg test
   generate: yarnpkg generate
