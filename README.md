@@ -2,7 +2,7 @@
 # libra-web-tools
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
-[![Build Status](https://travis-ci.org/Shopify/libra-web-tools.svg?branch=master)](https://travis-ci.org/Shopify/libra-web-tools)
+[![Build Status](https://travis-ci.com/Shopify/libra-web-tools.svg?branch=master)](https://travis-ci.com/github/Shopify/libra-web-tools)
 [![codecov](https://codecov.io/gh/Shopify/libra-web-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/Shopify/libra-web-tools)
 [![Greenkeeper badge](https://badges.greenkeeper.io/Shopify/libra-web-tools.svg)](https://greenkeeper.io/)
 [![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lernajs.io/)
