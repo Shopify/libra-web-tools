@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A collection of web tooling for the Libra network.",
   "engines": {
-    "node": "~v12.13.1",
+    "node": "~10.21.0",
     "yarn": "<=1.21.1"
   },
   "scripts": {

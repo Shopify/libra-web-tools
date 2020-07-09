@@ -4,7 +4,7 @@
   "license": "MIT",
   "description": "GraphQL utilities for connecting to the Libra network via the JSON-RPC API.",
   "engines": {
-    "node": "~v12.13.1",
+    "node": "~10.21.0",
     "yarn": "<=1.21.1"
   },
   "main": "dist/src/index.js",
@@ -17,7 +17,7 @@
     "preserver": "yarn run introspectify:server",
     "server": "ts-node scripts/server.ts",
     "prestart": "yarn run introspectify:server",
-    "start": "ts-node-dev --respawn --transpileOnly scripts/server.ts"
+    "start": "ts-node-dev --respawn --transpile-only scripts/server.ts"
   },
   "sideEffects": false,
   "publishConfig": {
