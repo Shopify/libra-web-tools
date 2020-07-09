@@ -51,15 +51,6 @@ export function addDumpFieldToSchema(schema: GraphQLSchema) {
   }, schema);
 }
 
-export const schema = addDumpFieldToSchema(
-  addFieldRenameResolversToSchema(
-    makeExecutableSchema({
-      typeDefs,
-      resolvers,
-    }),
-  ),
-);
-
 export function createContext(target: string): Context {
   return {
     rpc: createLibraRpc(target),
@@ -67,11 +58,22 @@ export function createContext(target: string): Context {
   };
 }
 
+export function createSchema() {
+  return addDumpFieldToSchema(
+    addFieldRenameResolversToSchema(
+      makeExecutableSchema({
+        typeDefs,
+        resolvers,
+      }),
+    ),
+  );
+}
+
 export function createApolloLink(target: string) {
   return ApolloLink.from([
     new SchemaLink({
       context: createContext(target),
-      schema,
+      schema: createSchema(),
     }),
   ]);
 }

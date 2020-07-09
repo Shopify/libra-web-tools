@@ -6,7 +6,7 @@ import {ApolloServer, PlaygroundRenderPageOptions} from 'apollo-server-express';
 import {print} from 'graphql';
 import gql from 'graphql-tag';
 
-import {createContext, schema} from '../src/link';
+import {createContext, createSchema} from '../src/link';
 import {LibraNetwork} from '../src/types';
 
 const {HOST = 'localhost', PORT = 8000} = process.env;
@@ -266,7 +266,7 @@ const server = new ApolloServer({
   playground: {
     tabs,
   },
-  schema,
+  schema: createSchema(),
 });
 server.applyMiddleware({app, path});
 
