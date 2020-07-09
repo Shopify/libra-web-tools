@@ -1,6 +1,7 @@
 import {Client, HTTPTransport, RequestManager} from '@open-rpc/client-js';
 import fetch from 'isomorphic-fetch';
 
+import {isDevelopment} from './env';
 import {LibraNetwork, LibraRPCMethods} from './types';
 
 export function createClient(target: string) {
@@ -109,11 +110,13 @@ function logOperation(
     ((Array.isArray(params) && params.length > 0) ||
       (typeof params === 'object' && Object.keys(params).length > 0));
 
-  // eslint-disable-next-line no-console
-  console.log(
-    `${operation} ${id}(${hasParams ? JSON.stringify(params) : ''})`,
-    ...[context].filter((value) => value !== undefined),
-  );
+  if (isDevelopment) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `${operation} ${id}(${hasParams ? JSON.stringify(params) : ''})`,
+      ...[context].filter((value) => value !== undefined),
+    );
+  }
 }
 
 export const KnownNetworks = {
