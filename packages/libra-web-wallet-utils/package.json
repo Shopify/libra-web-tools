@@ -4,7 +4,7 @@
   "license": "MIT",
   "description": "A collection of web utilities to work with libra wallets.",
   "engines": {
-    "node": "~v12.13.1",
+    "node": "~10.21.0",
     "yarn": "<=1.21.1"
   },
   "main": "dist/src/index.js",
