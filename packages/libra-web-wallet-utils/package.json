@@ -37,12 +37,12 @@
     "elliptic": "^6.0.0",
     "futoin-hkdf": "^1.0.0",
     "pbkdf2": "^3.0.0",
+    "protobufjs": "^6.0.0",
     "sha3": "^2.0.0"
   },
   "devDependencies": {
     "@types/elliptic": "^6.0.0",
     "@types/pbkdf2": "^3.0.0",
-    "protobufjs": "^6.0.0",
     "ts-node": "^8.0.0"
   },
   "files": [
