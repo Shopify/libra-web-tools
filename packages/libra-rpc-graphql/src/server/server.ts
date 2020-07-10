@@ -1,4 +1,4 @@
-import express from 'express';
+import express, {Express} from 'express';
 import {
   ApolloServer,
   ApolloServerExpressConfig,
@@ -12,13 +12,21 @@ import {LibraNetwork} from '../types';
 import {libraMintMutation, libraSeedMutation, libraTestQuery} from './graphql';
 import {wallet} from './variables';
 
-export interface ServerOptions {
-  config?: ApolloServerExpressConfig;
+export interface EndpointOptions {
   host?: string;
   path?: string;
   port?: number;
+}
+
+export interface ApolloOptions extends EndpointOptions {
+  config?: ApolloServerExpressConfig;
   tabs?: boolean;
   network?: string;
+}
+
+export interface ServerOptions extends ApolloOptions {
+  server?: ApolloServer;
+  app?: Express;
 }
 
 export const defaults = {
@@ -59,16 +67,16 @@ export function createEndpoint({
   host = defaults.host,
   path = defaults.path,
   port = defaults.port,
-}: ServerOptions) {
+}: EndpointOptions) {
   return `http://${host}:${port}${path}`;
 }
 
-export function createServer({
+export function createApollo({
   config,
   tabs = false,
   network: staticNetwork = defaults.network,
   ...endpointOptions
-}: ServerOptions = {}) {
+}: ApolloOptions = {}) {
   return new ApolloServer({
     context: ({
       req: {
@@ -83,14 +91,14 @@ export function createServer({
   });
 }
 
-export function startExpress(
-  options: ServerOptions = {},
-  server: ApolloServer = createServer(options),
-) {
-  const app = express();
+export function start({
+  app = express(),
+  server,
+  ...options
+}: ServerOptions = {}) {
   const {path = defaults.path, port = defaults.port} = options;
 
-  server.applyMiddleware({app, path});
+  (server || createApollo(options)).applyMiddleware({app, path});
 
   app.listen(port, () => {
     // eslint-disable-next-line no-console
