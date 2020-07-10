@@ -4,8 +4,8 @@
   "license": "MIT",
   "description": "GraphQL utilities for connecting to the Libra network via the JSON-RPC API.",
   "engines": {
-    "node": "~10.21.0",
-    "yarn": "<=1.21.1"
+    "node": "~10.19.0",
+    "yarn": "<=1.22.0"
   },
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",

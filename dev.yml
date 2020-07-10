@@ -2,8 +2,8 @@ name: libra-web-tools
 type: node
 up:
   - node:
-      version: v10.21.0
-      yarn: 1.21.1
+      version: v10.19.0
+      yarn: 1.22.0
 commands:
   __default__: server
   build: yarnpkg build
