@@ -16,8 +16,10 @@
     "introspectify:server": "yarn run introspectify src/graphql/schema.json",
     "preserver": "yarn run introspectify:server",
     "server": "ts-node scripts/server.ts",
-    "prestart": "yarn run introspectify:server",
-    "start": "ts-node-dev --respawn --transpile-only scripts/server.ts"
+    "prestart": "yarn run build && yarn run preserver",
+    "start": "yarn run playground",
+    "preplayground": "yarn run preserver",
+    "playground": "ts-node-dev --respawn --transpile-only scripts/server.ts"
   },
   "sideEffects": false,
   "publishConfig": {

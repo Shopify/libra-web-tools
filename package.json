@@ -23,7 +23,8 @@
     "generate": "plop",
     "generate:package": "plop package && yarn plop docs",
     "tophat": "tophat",
-    "playground": "yarn --cwd packages/libra-rpc-graphql run start",
+    "preplayground": "yarn run build",
+    "playground": "yarn --cwd packages/libra-rpc-graphql run playground",
     "wallet": "yarn --cwd packages/libra-web-wallet-utils run wallet",
     "start": "yarn run playground"
   },
