@@ -21,6 +21,7 @@ export function addFieldRenameResolversToSchema(schema: GraphQLSchema) {
   function createFieldNameResolver({name}: GraphQLField<any, any>) {
     return function resolver(source: any) {
       const snakeCaseFieldName = camelCaseToSnakeCase(name);
+
       return snakeCaseFieldName in source
         ? source[snakeCaseFieldName]
         : source[name];
@@ -41,6 +42,7 @@ export function addDumpFieldToSchema(schema: GraphQLSchema) {
 
   return getUserTypesFromSchema(schema).reduce((schema, type) => {
     const config = type.toConfig();
+
     return appendObjectFields(schema, type.name, {
       ...config.fields,
       _dump: {

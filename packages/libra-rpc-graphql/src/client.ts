@@ -69,9 +69,9 @@ export function createLibraFaucet(target: string) {
     );
 
     try {
-      // logOperation(Operation.Request, id, params);
-
       const uri = `${baseUri}?${new URLSearchParams(params)}`;
+
+      // logOperation(Operation.Request, id, uri);
 
       const response = await fetch(uri, {
         method: 'POST',

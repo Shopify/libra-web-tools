@@ -1,4 +1,4 @@
-import express, {Express} from 'express';
+import {Express} from 'express';
 import {
   ApolloServer,
   ApolloServerExpressConfig,
@@ -12,27 +12,15 @@ import {LibraNetwork} from '../types';
 import {libraMintMutation, libraSeedMutation, libraTestQuery} from './graphql';
 import {wallet} from './variables';
 
-export interface EndpointOptions {
-  host?: string;
-  path?: string;
-  port?: number;
-}
-
-export interface ApolloOptions extends EndpointOptions {
+export interface ApolloOptions {
   config?: ApolloServerExpressConfig;
-  tabs?: boolean;
   network?: string;
-}
-
-export interface ServerOptions extends ApolloOptions {
-  server?: ApolloServer;
-  app?: Express;
+  path?: string;
+  tabs?: boolean;
 }
 
 export const defaults = {
-  host: 'localhost',
   path: '/graphql',
-  port: 8000,
   network: LibraNetwork.Testnet,
 };
 
@@ -63,19 +51,11 @@ export function createTabs(
   ];
 }
 
-export function createEndpoint({
-  host = defaults.host,
-  path = defaults.path,
-  port = defaults.port,
-}: EndpointOptions) {
-  return `http://${host}:${port}${path}`;
-}
-
 export function createApollo({
   config,
   tabs = false,
   network: staticNetwork = defaults.network,
-  ...endpointOptions
+  path = defaults.path,
 }: ApolloOptions = {}) {
   return new ApolloServer({
     context: ({
@@ -83,27 +63,22 @@ export function createApollo({
         query: {network = staticNetwork},
       },
     }) => createContext(network as string),
+    introspection: true,
     playground: {
-      tabs: tabs ? createTabs(createEndpoint(endpointOptions)) : undefined,
+      tabs: tabs ? createTabs(path) : undefined,
     },
     schema: createSchema(),
     ...config,
   });
 }
 
-export function start({
-  app = express(),
-  server,
-  ...options
-}: ServerOptions = {}) {
-  const {path = defaults.path, port = defaults.port} = options;
+export function applyMiddleware(
+  app: Express,
+  apollo?: ApolloServer | ApolloOptions,
+) {
+  const server = apollo instanceof ApolloServer ? apollo : createApollo(apollo);
 
-  (server || createApollo(options)).applyMiddleware({app, path});
-
-  app.listen(port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`🚀  GraphQL playground running at ${createEndpoint(options)}`);
-  });
+  server.applyMiddleware({app, path: server.graphqlPath});
 
   return app;
 }

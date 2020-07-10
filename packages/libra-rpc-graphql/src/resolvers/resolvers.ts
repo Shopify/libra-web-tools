@@ -13,7 +13,7 @@ import {EventDataType, ScriptType, TransactionDataType} from './types';
 import {mapAbstractType, mapResolvers} from './utilities';
 
 function injectAddress(data: any, {address}) {
-  if (!address) {
+  if (!data || !address) {
     return data;
   }
 
