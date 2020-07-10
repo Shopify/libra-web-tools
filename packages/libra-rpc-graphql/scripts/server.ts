@@ -3,12 +3,22 @@
 
 import express from 'express';
 
-import {start} from '../src/server';
+import {applyMiddleware, defaults} from '../src/server';
 
-const {HOST: host, PORT} = process.env;
+const {GRAPHQL_PATH: path = defaults.path, PORT} = process.env;
+const port = Number(PORT) || 8000;
 const [network] = process.argv.slice(2);
+
 const app = express();
 
 app.get('/services/ping', (_req, res) => res.json('OK'));
+app.get('/', (_req, res) => res.redirect(path));
 
-start({app, host, port: Number(PORT) || undefined, network, tabs: true});
+applyMiddleware(app, {network, path});
+
+app.listen(port, () => {
+  // eslint-disable-next-line no-console
+  console.log(
+    `🚀  GraphQL playground running at http://localhost:${port}${path}`,
+  );
+});
