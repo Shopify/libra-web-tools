@@ -12,6 +12,15 @@ export default gql`
         publicKey
         authKey
         address
+        state {
+          sequenceNumber
+          isFrozen
+          balances {
+            amount
+            currency
+          }
+          role
+        }
       }
     }
     received: accountState(address: $address) {
