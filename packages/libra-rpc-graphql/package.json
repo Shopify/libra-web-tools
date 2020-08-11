@@ -1,6 +1,6 @@
 {
   "name": "@shopify/libra-rpc-graphql",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "license": "MIT",
   "description": "GraphQL utilities for connecting to the Libra network via the JSON-RPC API.",
   "engines": {
@@ -39,7 +39,7 @@
   "dependencies": {
     "@graphql-tools/schema": "^6.0.0",
     "@graphql-tools/utils": "^6.0.0",
-    "@shopify/libra-web-wallet-utils": "^2.0.2",
+    "@shopify/libra-web-wallet-utils": "^2.0.3",
     "apollo-link": "^1.0.0",
     "apollo-link-schema": "^1.0.0",
     "apollo-server-express": "^2.0.0",
