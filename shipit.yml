@@ -1,3 +1,5 @@
 dependencies:
+  pre:
+    - node -v
   post:
     - yarn run build
