@@ -1,6 +1,6 @@
 import {Resolvers, ResolverInfo} from 'src/types';
 
-export function mapResolvers(resolvers: Record<string, ResolverInfo<any>>) {
+export function mapRpcResolvers(resolvers: Record<string, ResolverInfo<any>>) {
   return Object.entries(resolvers).reduce(
     (
       resolvers: Resolvers,

@@ -1,16 +1,25 @@
 import {IResolvers} from '@graphql-tools/utils';
 
-export type LibraRPCMethods =
-  | 'get_account_state'
+export type LibraRpcMethods =
+  | 'get_account'
   | 'get_account_transaction'
+  | 'get_account_transactions'
   | 'get_currencies'
   | 'get_events'
   | 'get_metadata'
   | 'get_transactions'
   | 'submit';
 
+export interface LibraRpcOptions {
+  id?: number;
+}
+
 export interface Context {
-  rpc(method: LibraRPCMethods, params?: any[], timeout?: number): Promise<any>;
+  rpc(
+    method: LibraRpcMethods,
+    params?: any[],
+    options?: LibraRpcOptions,
+  ): Promise<any>;
   faucet(
     authKey: string,
     amountInMicroLibras: number,
@@ -21,7 +30,7 @@ export interface Context {
 export type Resolvers = IResolvers<any, Context>;
 
 export interface ResolverInfo<Args = {}> {
-  method: LibraRPCMethods;
+  method: LibraRpcMethods;
   mapArgs?(args: Args): any[];
   transform?(result: any, args: Args): any;
 }

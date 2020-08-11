@@ -1,36 +1,68 @@
-import {Client, HTTPTransport, RequestManager} from '@open-rpc/client-js';
 import fetch from 'isomorphic-fetch';
 
 import {isDevelopment} from './env';
-import {LibraNetwork, LibraRPCMethods} from './types';
+import {LibraNetwork, LibraRpcMethods, LibraRpcOptions} from './types';
 
-export function createClient(target: string) {
-  const uri = KnownNetworks[target] || target;
+type JSONRpcParam = string | number;
 
-  return new Client(new RequestManager([new HTTPTransport(uri)]));
+export interface JSONRpcPayload {
+  id?: number;
+  jsonrpc: '2.0';
+  method: LibraRpcMethods;
+  params: JSONRpcParam[];
+}
+
+export function createLibraRpcPayload(
+  method: LibraRpcMethods,
+  params: JSONRpcParam[] = [],
+  id?: number,
+) {
+  const payload: JSONRpcPayload = {jsonrpc: '2.0', method, params};
+
+  if (id) {
+    payload.id = id;
+  }
+
+  return payload;
 }
 
 export function createLibraRpc(target: string) {
-  const client = createClient(target);
+  const uri = KnownNetworks[target] || target;
 
   return async function rpc(
-    method: LibraRPCMethods,
-    params: any[] = [],
-    timeout?: number,
+    method: LibraRpcMethods,
+    params: JSONRpcParam[] = [],
+    {id}: LibraRpcOptions = {},
   ) {
     try {
       // logOperation(Operation.Request, method, params);
 
-      const response = await client.request(method, params, timeout);
+      const response = await fetch(uri, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(createLibraRpcPayload(method, params, id)),
+      });
+
+      const data = await response.json();
 
       logOperation(
         Operation.Response,
         method,
         params,
-        JSON.stringify(response, null, 2),
+        JSON.stringify(data, null, 2),
       );
 
-      return response;
+      if ('result' in data && typeof data.result === 'object') {
+        const {result, ...rpcMetadata} = data;
+
+        result._rpcMetadata = rpcMetadata;
+
+        return result;
+      }
+
+      throw new Error('Invalid Response');
     } catch (error) {
       logOperation(Operation.Error, method, params, error);
 

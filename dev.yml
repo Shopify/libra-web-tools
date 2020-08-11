@@ -4,6 +4,9 @@ up:
   - node:
       version: v10.21.0
       yarn: 1.21.1
+open:
+  app: http://localhost:8000/graphql
+
 commands:
   __default__: server
   build: yarnpkg build

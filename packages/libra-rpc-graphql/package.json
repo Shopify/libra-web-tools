@@ -39,7 +39,6 @@
   "dependencies": {
     "@graphql-tools/schema": "^6.0.0",
     "@graphql-tools/utils": "^6.0.0",
-    "@open-rpc/client-js": "^1.0.0",
     "@shopify/libra-web-wallet-utils": "^2.0.2",
     "apollo-link": "^1.0.0",
     "apollo-link-schema": "^1.0.0",
