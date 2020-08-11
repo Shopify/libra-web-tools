@@ -2,6 +2,10 @@ import gql from 'graphql-tag';
 
 export default gql`
   query LibraTest($phrase: String!, $address: HexString!) {
+    metadata {
+      version
+      timestamp
+    }
     wallet(phrase: $phrase) {
       seed {
         phrase
@@ -12,7 +16,7 @@ export default gql`
         publicKey
         authKey
         address
-        state {
+        libraAccount {
           sequenceNumber
           isFrozen
           balances {
@@ -23,17 +27,17 @@ export default gql`
         }
       }
     }
-    received: accountState(address: $address) {
+    received: account(address: $address) {
       receivedEvents {
         ...receivedEventFields
       }
     }
-    sent: accountState(address: $address) {
+    sent: account(address: $address) {
       sentEvents {
         ...sentEventFields
       }
     }
-    transactions: accountState(address: $address) {
+    transactions: account(address: $address) {
       transactions {
         version
         hash
@@ -54,7 +58,7 @@ export default gql`
     currency
   }
 
-  fragment accountFields on AccountState {
+  fragment accountFields on Account {
     sequenceNumber
     address
     authenticationKey
@@ -153,7 +157,7 @@ export default gql`
     maxGasAmount
     gasUnitPrice
     gasCurrency
-    expirationTime
+    expirationTimestampSecs
     scriptHash
     script {
       __typename

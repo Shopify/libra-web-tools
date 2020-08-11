@@ -10,7 +10,7 @@ import {Resolvers} from 'src/types';
 import {Context} from '../types';
 
 import {EventDataType, ScriptType, TransactionDataType} from './types';
-import {mapAbstractType, mapResolvers} from './utilities';
+import {mapAbstractType, mapRpcResolvers} from './utilities';
 
 function injectAddress(data: any, {address}) {
   if (!data || !address) {
@@ -23,17 +23,17 @@ function injectAddress(data: any, {address}) {
   };
 }
 
-async function accountState(rpc: Context['rpc'], address: string) {
-  const state = await rpc('get_account_state', [address]);
+async function libraAccount(rpc: Context['rpc'], address: string) {
+  const state = await rpc('get_account', [address]);
 
   return injectAddress(state, {address});
 }
 
 export const resolvers: Resolvers = {
   Query: {
-    ...mapResolvers({
-      accountState: {
-        method: 'get_account_state',
+    ...mapRpcResolvers({
+      account: {
+        method: 'get_account',
         mapArgs: ({address}) => [address],
         transform: injectAddress,
       },
@@ -45,16 +45,24 @@ export const resolvers: Resolvers = {
           includeEvents,
         ],
       },
+      accountTransactions: {
+        method: 'get_account_transactions',
+        mapArgs: ({address, start = 0, limit = 10, includeEvents = false}) => [
+          address,
+          Number(start),
+          Number(limit),
+          includeEvents,
+        ],
+      },
       currencies: {
         method: 'get_currencies',
       },
       events: {
         method: 'get_events',
-        mapArgs: ({key, start, limit}) => [key, start, limit],
+        mapArgs: ({key, start = 0, limit = 10}) => [key, start, limit],
       },
       metadata: {
         method: 'get_metadata',
-        mapArgs: () => [''],
       },
       transaction: {
         method: 'get_transactions',
@@ -69,7 +77,7 @@ export const resolvers: Resolvers = {
       },
       transactions: {
         method: 'get_transactions',
-        mapArgs: ({startVersion, limit, includeEvents = false}) => [
+        mapArgs: ({startVersion, limit = 10, includeEvents = false}) => [
           Number(startVersion),
           Number(limit),
           includeEvents,
@@ -86,15 +94,23 @@ export const resolvers: Resolvers = {
         },
       },
     }),
+    apiMethod(_source, {name, params = []}, {rpc}) {
+      return rpc(name, params);
+    },
+    async currency(_source, {code}, {rpc}) {
+      const currencies: {code: string}[] = await rpc('get_currencies');
+
+      return currencies.find((currency) => currency.code === code);
+    },
     wallet(_source, {key, phrase}) {
       return LibraWallet.fromKeyOrPhrase({key, phrase});
     },
-    account(_source, {secretKey}) {
+    walletAccount(_source, {secretKey}) {
       return LibraAccount.fromSecretKey(secretKey);
     },
   },
   Mutation: {
-    ...mapResolvers({
+    ...mapRpcResolvers({
       submitTransaction: {
         method: 'submit',
         mapArgs: ({input: {data}}) => [data],
@@ -110,16 +126,16 @@ export const resolvers: Resolvers = {
     ) {
       await faucet(authKey, Number(amountInMicroLibras), currencyCode);
 
-      return accountState(rpc, LibraAccount.authKeyParts(authKey).address);
+      return libraAccount(rpc, LibraAccount.authKeyParts(authKey).address);
     },
   },
 
-  Account: {
-    state({address}: LibraAccount, _args, {rpc}) {
-      return accountState(rpc, address);
+  WalletAccount: {
+    libraAccount({address}: LibraAccount, _args, {rpc}) {
+      return libraAccount(rpc, address);
     },
   },
-  AccountState: {
+  Account: {
     address({address, authentication_key}) {
       return address || LibraAccount.authKeyParts(authentication_key).address;
     },
@@ -143,31 +159,43 @@ export const resolvers: Resolvers = {
         includeEvents,
       ]);
     },
-    async transactions(
-      {address, authentication_key, sequence_number},
+    transactions(
+      {address, authentication_key},
       {start = 0, limit = 10, includeEvents = false},
       {rpc},
     ) {
-      const transactions: any[] = [];
-
-      for (
-        let sequence = start;
-        transactions.length < limit && sequence < sequence_number;
-        ++sequence
-      ) {
-        const transaction = await rpc('get_account_transaction', [
-          address || LibraAccount.authKeyParts(authentication_key).address,
-          sequence,
-          includeEvents,
-        ]);
-
-        if (transaction) {
-          transactions.push(transaction);
-        }
-      }
-
-      return transactions;
+      return rpc('get_account_transactions', [
+        address || LibraAccount.authKeyParts(authentication_key).address,
+        start,
+        limit,
+        includeEvents,
+      ]);
     },
+    // async transactions(
+    //   {address, authentication_key, sequence_number},
+    //   {start = 0, limit = 10, includeEvents = false},
+    //   {rpc},
+    // ) {
+    //   const transactions: any[] = [];
+
+    //   for (
+    //     let sequence = start;
+    //     transactions.length < limit && sequence < sequence_number;
+    //     ++sequence
+    //   ) {
+    //     const transaction = await rpc('get_account_transaction', [
+    //       address || LibraAccount.authKeyParts(authentication_key).address,
+    //       sequence,
+    //       includeEvents,
+    //     ]);
+
+    //     if (transaction) {
+    //       transactions.push(transaction);
+    //     }
+    //   }
+
+    //   return transactions;
+    // },
   },
   Event: {
     data: mapAbstractType(EventDataType, 'data'),
@@ -186,7 +214,7 @@ export const resolvers: Resolvers = {
       return receiver;
     },
     receiver({receiver}, _args, {rpc}) {
-      return accountState(rpc, receiver);
+      return libraAccount(rpc, receiver);
     },
   },
   NewBlockEventData: {
@@ -194,7 +222,7 @@ export const resolvers: Resolvers = {
       return proposer;
     },
     proposer({proposer}, _args, {rpc}) {
-      return accountState(rpc, proposer);
+      return libraAccount(rpc, proposer);
     },
   },
   PeerToPeerTransferScript: {
@@ -202,7 +230,7 @@ export const resolvers: Resolvers = {
       return receiver;
     },
     receiver({receiver}, _args, {rpc}) {
-      return accountState(rpc, receiver);
+      return libraAccount(rpc, receiver);
     },
   },
   ReceivedPaymentEventData: {
@@ -210,7 +238,7 @@ export const resolvers: Resolvers = {
       return sender;
     },
     sender({sender}, _args, {rpc}) {
-      return accountState(rpc, sender);
+      return libraAccount(rpc, sender);
     },
   },
   SentPaymentEventData: {
@@ -218,7 +246,7 @@ export const resolvers: Resolvers = {
       return receiver;
     },
     receiver({receiver}, _args, {rpc}) {
-      return accountState(rpc, receiver);
+      return libraAccount(rpc, receiver);
     },
   },
   Seed: {
@@ -234,7 +262,7 @@ export const resolvers: Resolvers = {
       return sender;
     },
     sender({sender}, _args, {rpc}) {
-      return accountState(rpc, sender);
+      return libraAccount(rpc, sender);
     },
     script: mapAbstractType(ScriptType, 'script'),
   },

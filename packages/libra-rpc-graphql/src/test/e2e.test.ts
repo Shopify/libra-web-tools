@@ -23,7 +23,7 @@ describe('e2e', () => {
       timestamp: 123,
     };
     fetchMock.mockReturnValue({
-      text: () => JSON.stringify({id: 0, jsonrpc: '2.0', result: metadata}),
+      json: () => ({jsonrpc: '2.0', result: metadata}),
     });
 
     const query = gql`

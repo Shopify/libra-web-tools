@@ -42,7 +42,7 @@ export class LibraWallet<Seed extends LibraSeed = LibraSeed> {
   toString() {
     Object.entries(this.accounts)
       .map(([index, account]) =>
-        [`Account #${index}`, account.toString()].join('\n'),
+        [`Wallet Account #${index}`, account.toString()].join('\n'),
       )
       .join('\n\n');
   }
