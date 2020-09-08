@@ -57,7 +57,9 @@ export function createLibraRpc(target: string) {
       if ('result' in data && typeof data.result === 'object') {
         const {result, ...rpcMetadata} = data;
 
-        result._rpcMetadata = rpcMetadata;
+        if (result) {
+          result._rpcMetadata = rpcMetadata;
+        }
 
         return result;
       }
