@@ -29,6 +29,7 @@ Without `dev` we can instead run `yarn && yarn start` to get up and running.
 | package |     |     |
 | ------- | --- | --- |
 | libra-rpc-graphql | [directory](packages/libra-rpc-graphql) | [![npm version](https://badge.fury.io/js/%40shopify%2Flibra-rpc-graphql.svg)](https://badge.fury.io/js/%40shopify%2Flibra-rpc-graphql) |
+| libra-rpc-graphql-server | [directory](packages/libra-rpc-graphql-server) | [![npm version](https://badge.fury.io/js/%40shopify%2Flibra-rpc-graphql-server.svg)](https://badge.fury.io/js/%40shopify%2Flibra-rpc-graphql-server) |
 | libra-web-wallet-utils | [directory](packages/libra-web-wallet-utils) | [![npm version](https://badge.fury.io/js/%40shopify%2Flibra-web-wallet-utils.svg)](https://badge.fury.io/js/%40shopify%2Flibra-web-wallet-utils) |
 
 ## Want to contribute?

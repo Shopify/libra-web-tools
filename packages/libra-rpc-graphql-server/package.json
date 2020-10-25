@@ -1,0 +1,39 @@
+{
+  "name": "@shopify/libra-rpc-graphql-server",
+  "version": "0.0.0",
+  "license": "MIT",
+  "description": "Libra GraphQL Playground Apollo server running on express",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "scripts": {
+    "build": "tsc --p tsconfig.json"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "@shopify:registry": "https://registry.npmjs.org"
+  },
+  "author": "Shopify Inc.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shopify/libra-web-tools.git",
+    "directory": "packages/libra-rpc-graphql-server"
+  },
+  "bugs": {
+    "url": "https://github.com/Shopify/libra-web-tools/issues"
+  },
+  "homepage": "https://github.com/Shopify/libra-web-tools/blob/master/packages/libra-rpc-graphql-server/README.md",
+  "dependencies": {
+    "apollo-server-express": "^2.0.0",
+    "express": "^4.0.0",
+    "graphql": "^14.0.0",
+    "graphql-tag": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.0.0"
+  },
+  "files": [
+    "dist/*",
+    "!tsconfig.tsbuildinfo"
+  ]
+}
