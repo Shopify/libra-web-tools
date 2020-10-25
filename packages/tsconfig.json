@@ -3,6 +3,7 @@
   "include": [],
   "references": [
     {"path": "./libra-rpc-graphql"},
+    {"path": "./libra-rpc-graphql-server"},
     {"path": "./libra-web-wallet-utils"}
   ]
 }
