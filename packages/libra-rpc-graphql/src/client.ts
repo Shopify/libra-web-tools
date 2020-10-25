@@ -26,8 +26,16 @@ export function createLibraRpcPayload(
   return payload;
 }
 
+export function getNetworkUri(target: string) {
+  if (target.startsWith('http')) {
+    return target;
+  }
+
+  return KnownNetworks[target];
+}
+
 export function createLibraRpc(target: string) {
-  const uri = KnownNetworks[target] || target;
+  const uri = getNetworkUri(target);
 
   return async function rpc(
     method: LibraRpcMethods,
@@ -36,6 +44,10 @@ export function createLibraRpc(target: string) {
   ) {
     try {
       // logOperation(Operation.Request, method, params);
+
+      if (!uri) {
+        throw new Error(`Unknown network: ${target}`);
+      }
 
       const response = await fetch(uri, {
         method: 'POST',
@@ -73,9 +85,17 @@ export function createLibraRpc(target: string) {
   };
 }
 
+export function getFaucetUri(target: string) {
+  if (target.startsWith('http')) {
+    return target;
+  }
+
+  return KnownFaucets[target];
+}
+
 export function createLibraFaucet(target: string) {
+  const baseUri = getFaucetUri(target);
   const id = 'faucet';
-  const baseUri = KnownFaucets[target] || target;
 
   /* eslint-disable @typescript-eslint/camelcase */
   function buildFaucetParams(
@@ -103,9 +123,13 @@ export function createLibraFaucet(target: string) {
     );
 
     try {
-      const uri = `${baseUri}?${new URLSearchParams(params)}`;
+      const uri = baseUri && `${baseUri}?${new URLSearchParams(params)}`;
 
       // logOperation(Operation.Request, id, uri);
+
+      if (!uri) {
+        throw new Error(`Unknown faucet: ${target}`);
+      }
 
       const response = await fetch(uri, {
         method: 'POST',

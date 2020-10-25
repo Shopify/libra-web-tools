@@ -11,5 +11,8 @@
     "./src/**/*.tsx"
   ],
   "exclude": ["**/*.test.ts", "**/*.test.tsx"],
-  "references": [{"path": "../libra-web-wallet-utils"}]
+  "references": [
+    {"path": "../libra-web-wallet-utils"},
+    {"path": "../libra-rpc-graphql-server"}
+  ]
 }
