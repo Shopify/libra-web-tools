@@ -1,20 +1,37 @@
 /* eslint-env node */
 /* eslint-disable no-process-env */
 
-import express from 'express';
+import {
+  applyMiddleware,
+  createServer,
+  defaults,
+} from '@shopify/libra-rpc-graphql-server';
 
-import {applyMiddleware, defaults} from '../src/server';
+import {createContext, createSchema} from '../src/link';
+import {LibraNetwork} from '../src/types';
 
-const {GRAPHQL_PATH: path = defaults.path, PORT} = process.env;
-const port = Number(PORT) || 8000;
-const [network] = process.argv.slice(2);
+const path = process.env.GRAPHQL_PATH || defaults.path;
+const port = Number(process.env.PORT) || 8000;
+const [staticNetwork = LibraNetwork.Testnet] = process.argv.slice(2);
 
-const app = express();
+const app = applyMiddleware(
+  createServer(createSchema(), {
+    tabs: {minter: true},
+    context({
+      req: {
+        headers: {referer},
+      },
+    }) {
+      const network =
+        new URL(referer).searchParams.get('network') || staticNetwork;
+
+      return createContext(network as string);
+    },
+  }),
+);
 
 app.get('/services/ping', (_req, res) => res.json('OK'));
 app.get('/', (_req, res) => res.redirect(path));
-
-applyMiddleware(app, {network, path});
 
 app.listen(port, () => {
   // eslint-disable-next-line no-console
