@@ -1,6 +1,6 @@
 {
   "name": "@shopify/libra-rpc-graphql",
-  "version": "2.5.2",
+  "version": "2.6.0",
   "license": "MIT",
   "description": "GraphQL utilities for creating an Apollo link that connects to the Libra network via the JSON-RPC API.",
   "engines": {
