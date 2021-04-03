@@ -1,4 +1,6 @@
 // these variables are the result of the LibraSeed mutation
+// NOTE: all of these keys are for demonstration purposes,
+//       none of these keys secure any production assets.
 export const wallet = {
   phrase:
     'resource setup claim iron carpet east dose truck dry file olympic february own federal pioneer total candy beef usage heart relax dance library height',
