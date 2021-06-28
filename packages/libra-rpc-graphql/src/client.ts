@@ -178,9 +178,9 @@ function logOperation(
 }
 
 export const KnownNetworks = {
-  [LibraNetwork.Testnet]: 'https://client.testnet.libra.org',
+  [LibraNetwork.Testnet]: 'https://client.testnet.diem.com',
 };
 
 export const KnownFaucets = {
-  [LibraNetwork.Testnet]: 'http://faucet.testnet.libra.org',
+  [LibraNetwork.Testnet]: 'http://faucet.testnet.diem.com',
 };
