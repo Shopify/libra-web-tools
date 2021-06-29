@@ -15,7 +15,7 @@ Once we've identified a package for adding to `libra-web-tools`, it's time to be
 
 ### Naming
 
-If you need help with finding a good name for your package, feel free to reach our in `#web-foundation-tech` on Slack, or else just pick a relevant name and add a comment to the PR asking for feedback.
+If you need help with finding a good name for your package, feel free to reach our in `#kernel-web-foundations` on Slack, or else just pick a relevant name and add a comment to the PR asking for feedback.
 
 ## Trading in a PR
 
