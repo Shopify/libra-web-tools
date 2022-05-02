@@ -1,4 +1,0 @@
-classification: library
-ci_url: https://travis-ci.com/github/Shopify/libra-web-tools
-slack_channels:
-- libra-web
